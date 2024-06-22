@@ -40,7 +40,9 @@ def get(f):
 
 class CaptchaKiller(object):
     def __init__(self):
-        tf.reset_default_graph()
+        # Ensure TensorFlow 1.x compatibility mode is enabled
+        tf.compat.v1.disable_eager_execution()
+        tf.compat.v1.reset_default_graph()
         self.session = None
         self.input_holder = None
         self.output_node = None
@@ -63,14 +65,14 @@ class CaptchaKiller(object):
 
     def loadModel(self):
         with tf.device('/cpu:0'):
-            self.input_holder = tf.placeholder(tf.float32, [None, IMG_HEIGHT, IMG_WIDTH, 1])
+            self.input_holder = tf.compat.v1.placeholder(tf.float32, [None, IMG_HEIGHT, IMG_WIDTH, 1])
             _output = inference.inference(self.input_holder, False)
 
             self.output_node = tf.reshape(_output, OUTPUT_SHAPE)
 
-            saver = tf.train.Saver()
+            saver = tf.compat.v1.train.Saver()
 
-        self.session = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
+        self.session = tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(allow_soft_placement=True))
 
         saver.restore(self.session, MODEL_PATH_NAME)
 
